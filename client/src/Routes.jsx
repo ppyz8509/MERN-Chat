@@ -1,6 +1,7 @@
-import RegisterAndLoginFrom from './componentd/RegisterAndLoginFrom'
-import Chat  from './componentd/Chat'
+import RegisterAndLoginFrom from './components/RegisterAndLoginFrom'
+import Chat  from './components/Chat'
 import { UserContext } from './context/UserContext'
+import { useContext } from 'react'
 import React from 'react'
 
 

@@ -7,8 +7,8 @@ const mongoose = require("mongoose");
 const cookieParser =  require("cookie-parser");
 const User = require("./models/User")
 
-//เพื่อเรียกใช้ไฟล์ .env
-dotenv.config();
+
+dotenv.config();//เพื่อเรียกใช้ไฟล์ .env
 const app = express();
 
 app.use(cors({credentials: true, origin:"http://localhost:5173"}));
@@ -16,19 +16,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname+"/uploads"));
 
-//เชื่อมต่อกับ mongo
+//connet mongo
 const MONGODB_URI = process.env.MONGODB_URI;
 mongoose.connect(MONGODB_URI,(err)=>{
     if(err) console.log(err);
     console.log('connect');
 });
 
-//ลองว่าเชื่อมต่อกับเซิฟเวอร์ได้ไหม
+//ไว้ตรวจสอบการเชื่อมต่อฐานข้อมูล
 app.get("/", (req, res) =>{
-    res.send("<h1>This is a RESaFUL")
+    res.send("This is a ฐานข้อมูล")
 })
 
-//User Register
+//Register
 const salt = bcrypt.genSaltSync(10);
 app.post("/register", async (req,res)=>{
     const {username, password} = req.body; // สลายโครงสร้าง  
@@ -53,10 +53,10 @@ app.post("/login", async(req,res)=>{
     if (userDoc) { 
     const isMatchedPassword = bcrypt.compareSync(password, userDoc.password); //เช็ค พาส ที่ได้จากฟอร์ม และในฐานข้อมูลว่าเหมือนกันไหม
     if(isMatchedPassword){
-        //logged in
+ 
         jwt.sign({username, userid: userDoc._id}, secret, {}, (err, token)=>{
             if(err) throw err;
-            //save data in cookie
+
             res.cookie("token", token).json({
                 userid: userDoc._id,
                 username,
@@ -88,7 +88,7 @@ app.get("/profile" , (req,res) => {
     }
 })
 
-//บอกว่าให้ฟังที่ PORTไหน โดยดึงมาจากไฟล์ env
+//เป็นตัวบอกว่ามาจาก PORTไหน โดยดึงมาจากไฟล์ env
 const PORT = process.env.PORT;
 app.listen(PORT, () =>{
     console.log("Server is" + PORT);
