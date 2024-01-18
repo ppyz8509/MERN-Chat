@@ -1,71 +1,100 @@
-import { useState, useContext } from "react";
-import axios from "axios";
+import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../context/UserContext";
-import { FaUser, FaUsers } from "react-icons/fa";  // นำเข้าไอค่อนจาก FontAwesome
+import { FaUser } from "react-icons/fa";
+import Logo from "./Logo";
+import Contact from "./Contact";
 
 const Chat = () => {
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState([]);
-    const { username } = useContext(UserContext);
+  const { logout } = useContext(UserContext);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            setMessages((prevMessages) => [...prevMessages, { username, message }]);
-            setMessage("");
-        } catch (error) {
-            console.error("Error sending message:", error);
-        }
-    };
+  const handleLogout = () => {
+    logout();
+  };
 
-    return (
-        <div className="flex h-screen bg-blue-50">
-            {/* โปรไฟล์ทางซ้ายมือ */}
-            <div className="w-1/4 bg-white border-r p-4">
-                <h2 className="text-2xl font-semibold mb-4">Friends</h2>
-                {/* รายชื่อเพื่อน */}
-                <ul>
-                    {/* นำเข้าข้อมูลเพื่อนจาก API หรือ context ได้ตามต้องการ */}
-                    <li className="mb-2 flex items-center">
-                        <FaUser className="mr-2 text-blue-500" /> Friend 1
-                    </li>
-                    <li className="mb-2 flex items-center">
-                        <FaUser className="mr-2 text-blue-500" /> Friend 2
-                    </li>
-                    <li className="mb-2 flex items-center">
-                        <FaUser className="mr-2 text-blue-500" /> Friend 3
-                    </li>
-                  
-                </ul>
-            </div>
-
-            {/* แชท */}
-            <div className="flex-1 flex flex-col">
-                <div className="flex-1 overflow-y-auto p-4">
-                    {/* แสดงข้อความ */}
-                    {messages.map((msg, index) => (
-                        <div key={index} className="mb-2">
-                            <span className="font-semibold">{msg.username}:</span> {msg.message}
-                        </div>
-                    ))}
-                </div>
-
-                {/* แบบฟอร์มสำหรับส่งข้อความ */}
-                <form onSubmit={handleSubmit} className="p-4 border-t flex items-center">
-                    <input
-                        type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type your message..."
-                        className="w-full rounded-l-full p-2 border"
-                    />
-                    <button type="submit" className="bg-blue-500 text-white rounded-r-full p-2 ml-2">
-                        ส่ง
-                    </button>
-                </form>
-            </div>
+  return (
+    <div className="flex h-screen bg-blue-50">
+      <div className="bg-white w-1/4 flex flex-col">
+        <div className="flex-grow">
+          <Logo />
+          <Contact
+            username={"user1"}
+            id={"65a7a099f1f52202f44ea081"}
+            online={true}
+            selected={true}
+          />
+          <Contact
+            username={"user2"}
+            id={"65a8bb2bf210f37524d15bc5"}
+            online={false}
+            selected={false}
+          />
         </div>
-    );
+        <div className="p-2 text-center flex items-center justify-center">
+          <span className="mr-2 text-sm text-gray-600 flex items-center">
+            <FaUser className="mr-1" />
+            Username
+          </span>
+          <button
+            onClick={handleLogout}
+            className="text-sm bg-blue-100 px-3 py-1 text-gray-500 border rounded-full"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col bg-blue-50 w-3/4 p-4">
+        <div className="flex-grow bg-gray-200">
+          <div className="flex h-full items-center justify-center text-gray-500">
+            &larr; Select a person from sidebar
+          </div>
+        </div>
+        <form className="flex items-center p-4 bg-white">
+          <input
+            type="text"
+            placeholder="Type your message"
+            className="flex-grow border rounded-full p-3 focus:outline-none focus:border-blue-500"
+          />
+
+          <label className="bg-blue-200 p-2 text-gray-600 cursor-pointer rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+              />
+            </svg>
+            <input type="file" className="hidden" />
+          </label>
+          <button
+            type="submit"
+            className="bg-blue-500 p-2 text-white rounded-full"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Chat;

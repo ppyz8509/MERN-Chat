@@ -22,9 +22,9 @@ const RegisterAndLoginFrom = () => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-blue-50">
-            <form onSubmit={handleSubmit} className="w-96 mx-auto bg-white p-8 rounded-md shadow-md">
-                <h2 className="text-2xl font-semibold mb-4">
+        <div className="flex items-center justify-center h-screen bg-blue-50" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80)", backdropFilter: "blur(5px)" }}>
+            <form onSubmit={handleSubmit} className="w-96 mx-auto bg-white p-8 rounded-md shadow-md" style={{ opacity: 0.9 }}>
+                <h2 className="text-2xl font-semibold mb-4" >
                     {isLoginOrRegister === "register" ? "Register" : "Login"}
                 </h2>
 
@@ -48,7 +48,7 @@ const RegisterAndLoginFrom = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <button className="bg-blue-500 text-white block w-full rounded-sm p-3">
+                <button className="bg-blue-500 text-white block w-full rounded-sm p-3 hover:bg-blue-700">
                     {isLoginOrRegister === "register" ? "Register" : "Login"}
                 </button>
 
