@@ -11,6 +11,8 @@ const ws = require("ws");
 const fs = require("fs");
 const { setTimeout } = require("timers/promises");
 const { log } = require("console");
+const { resolve } = require("path");
+const { rejects } = require("assert");
 
 dotenv.config(); //เพื่อเรียกใช้ไฟล์ .env
 const app = express();
@@ -110,6 +112,29 @@ app.get("/people", async (req, res) => {
   res.json(users);
 });
 
+const getUserDataFromRequest = (req) => {
+  return new Promise((resolve, reject) => {
+    const token = req.cookies?.token;
+    if(token){
+      jwt.verify(token,secret,{},(err,userData) =>{
+        if(err) throw err ;
+        resolve(userData)
+      })
+    } else {
+      reject("no token")
+    }
+  })
+}
+app.get("/messages/:userId" , async (req,res)=>{
+  const {userId} = req.params;
+  const userData = await getUserDataFromRequest(req);
+  const ourUserId = userData.userId
+  const message = await Message.find({
+    sender:{$in:userId, ourUserId},
+    recipient: {$in: [userId, ourUserId]}
+  }).sort({ createAt:1})
+  res.json(message)
+})
 
 
 
@@ -120,7 +145,7 @@ wss.on("connection", (connection, req) => {
       client.send(
         JSON.stringify({
           online: [...wss.clients].map((c) => ({
-            userId: c.userId,
+            userId: c.useId, // แก้ไข c.userId เป็น c.useId
             username: c.username,
           })),
         })
@@ -139,9 +164,10 @@ wss.on("connection", (connection, req) => {
     }, 1000);
   }, 5000);
 
-connection.on("pong", () => {
+  connection.on("pong", () => {
     clearTimeout(connection.deadTimer);
   });
+
   //read username and id from the cookie for this connection
   const cookies = req.headers.cookie;
   if (cookies) {
@@ -160,6 +186,7 @@ connection.on("pong", () => {
       }
     }
   }
+
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, sender, text, file } = messageData;
@@ -172,24 +199,24 @@ connection.on("pong", () => {
       //เก็บไฟล์ในuploads
       const path = __dirname + "/uploads/" + filename;
       //ป้องกันการอัพโหลดไฟล์ชื่อซ้ำ
-      const bufferData = new Buffer(file.name.data.split(",")[1], "base64");
-      fs.writeFile(path, bufferData, () => {
+      //const bufferData = new Buffer(file.name.data.split(",")[1], "base64");
+      fs.writeFile(path, file.data.split(",")[1], "base64", () => {
         console.log("file saved: " + path);
       });
     }
     if (recipient && (text || file)) {
       const messageDoc = await Message.create({
-        sender: connection.userId,
+        sender: connection.useId,
         recipient,
         text,
         file: file ? filename : null,
       });
       [...wss.clients]
-        .filter((c) => c.userId === recipient)
+        .filter((c) => c.useId === recipient)
         .forEach((c) =>
           c.send(
             JSON.stringify({
-              sender: connection.userId,
+              sender: connection.useId,
               recipient,
               text,
               file: file ? filename : null,
