@@ -3,7 +3,6 @@ import { UserContext } from "../context/UserContext";
 import axios from "axios";
 import Logo from "./Logo";
 import Contact from "./Contact";
-import { FaUser } from "react-icons/fa";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -84,41 +83,46 @@ const Chat = () => {
     <div className="flex h-screen bg-blue-50">
       <div className="bg-white w-1/4 flex flex-col">
         <div className="flex-grow">
-       
           <Logo />
-          {Object.keys(onlinePeopleExclOurUser).map
-          ((userId) => (
+          {Object.keys(onlinePeopleExclOurUser).map((userId) => (
             <Contact
-             key={userId}
-             username={onlinePeopleExclOurUser[userId]}
-             id={userId}
-             online={true}
-             selected={userId === selectedUserId}
-             onClick={() => {
-              setSelectedUserId(userId)
-             }}
-          />
+              key={userId}
+              username={onlinePeopleExclOurUser[userId]}
+              id={userId}
+              online={true}
+              selected={userId === selectedUserId}
+              onClick={() => setSelectedUserId(userId)}
+            />
           ))}
-         
-         {Object.keys(onlinePeopleExclOurUser).map
-          ((userId) => (
+          {Object.keys(offlinePeople).map((userId) => (
             <Contact
-             key={userId}
-             username={onlinePeopleExclOurUser[userId].username}
-             id={userId}
-             online={false}
-             selected={userId === selectedUserId}
-             onClick={() => {
-              setSelectedUserId(userId)
-             }}
-          />
+              key={userId}
+              username={offlinePeople[userId].username}
+              id={userId}
+              online={false}
+              selected={userId === selectedUserId}
+              onClick={() => setSelectedUserId(userId)}
+            />
           ))}
         </div>
         <div className="p-2 text-center flex items-center justify-center">
-        <span className="mr-2 text-sm text-gray-600 flex items-center">
-          <FaUser className="mr-1" />
-       {username}
-        </span>
+        <span className="mr-2 text-sm text-gray-600 flex item-center ">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+              />
+            </svg>
+            {username}
+          </span>
         <button
   onClick={logout}
   className="text-sm bg-blue-100 px-3 py-1 text-gray-500 border rounded-full"

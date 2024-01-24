@@ -10,6 +10,7 @@ const Message = require("./models/Message");
 const ws = require("ws");
 const fs = require("fs");
 const { setTimeout } = require("timers/promises");
+const { log } = require("console");
 
 dotenv.config(); //เพื่อเรียกใช้ไฟล์ .env
 const app = express();
@@ -32,7 +33,7 @@ app.get("/", (req, res) => {
   res.send("This is a Restful api mernchat");
 });
 
-//Register
+//User Register
 const salt = bcrypt.genSaltSync(10);
 app.post("/register", async (req, res) => {
   const { username, password } = req.body; // สลายโครงสร้าง
@@ -56,9 +57,10 @@ app.post("/login", async (req, res) => {
   if (userDoc) {
     const isMatchedPassword = bcrypt.compareSync(password, userDoc.password); //เช็ค พาส ที่ได้จากฟอร์ม และในฐานข้อมูลว่าเหมือนกันไหม
     if (isMatchedPassword) {
+      //logged in
       jwt.sign({ username, userId: userDoc._id }, secret, {}, (err, token) => {
         if (err) throw err;
-
+        //save data in cookie
         res.cookie("token", token).json({
           userId: userDoc._id,
           username,
@@ -88,24 +90,31 @@ app.get("/profile", (req, res) => {
   }
 });
 
-//เป็นตัวบอกว่ามาจาก PORTไหน โดยดึงมาจากไฟล์ env
+app.get("/people", async (req, res) => {
+  const users = await User.find({}, { _id: 1, username: 1 });
+  res.json(users);
+});
+
+//บอกว่าให้ฟังที่ PORTไหน โดยดึงมาจากไฟล์ env
 const PORT = process.env.PORT;
 const server = app.listen(PORT, () => {
-  console.log("Server is running on " + PORT);
+  console.log("Server is" + PORT);
 });
+
 //Web Socket Server
 const wss = new ws.WebSocketServer({ server });
 
 
-app.get("/people", async (req, res) =>{
-const user = await User.find({},{_id: 1, username: 1})
-})
-
+app.get("/people", async (req, res) => {
+  const users = await User.find({}, { _id: 1, username: 1 });
+  res.json(users);
+});
 
 
 
 
 wss.on("connection", (connection, req) => {
+  //เเจ้งเพื่อนๆว่าออนไลน์อยู่
   const notifyAboutOnlinePeople = () => {
     [...wss.clients].forEach((client) => {
       client.send(
@@ -118,8 +127,8 @@ wss.on("connection", (connection, req) => {
       );
     });
   };
-  
   connection.isAlive = true;
+
   connection.timer = setInterval(() => {
     connection.ping();
     connection.deadTimer = setTimeout(() => {
@@ -130,7 +139,7 @@ wss.on("connection", (connection, req) => {
     }, 1000);
   }, 5000);
 
-  connection.on("pong", () => {
+connection.on("pong", () => {
     clearTimeout(connection.deadTimer);
   });
   //read username and id from the cookie for this connection
@@ -175,13 +184,19 @@ wss.on("connection", (connection, req) => {
         text,
         file: file ? filename : null,
       });
-      [...wss.clients].filter(c=>c.useId === recipient).forEach(c=> c.c.send(JSON.stringify({
-        text,
-        file: file ? filename: null,
-        sender: connection.useId,
-        recipient,
-        _id:messageDoc._id,
-      })))
+      [...wss.clients]
+        .filter((c) => c.userId === recipient)
+        .forEach((c) =>
+          c.send(
+            JSON.stringify({
+              sender: connection.userId,
+              recipient,
+              text,
+              file: file ? filename : null,
+              _id: messageDoc._id,
+            })
+          )
+        );
     }
   });
 
