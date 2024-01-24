@@ -5,14 +5,6 @@ export const UserContext = createContext();
 export const UserContextProvider = ({children}) =>{
     const [username, setUsername] = useState(null);
     const [id, setId] = useState(null);
-
-
-    const logout = () => {
-        setUsername("");
-        setId("");
-      };
-
-
     useEffect(()=>{
         axios.get("profile").then(response =>{
             setId(response.data.userId);
@@ -20,7 +12,7 @@ export const UserContextProvider = ({children}) =>{
         });
     },[]);
     return(
-        <UserContext.Provider value={{username, setUsername,id, setId,logout}}>
+        <UserContext.Provider value={{username, setUsername,id, setId}}>
         {children}
         </UserContext.Provider>
     )

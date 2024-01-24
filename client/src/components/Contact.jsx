@@ -1,9 +1,10 @@
 import React from "react";
 import Avatar from "./Avatar";
 
-const Contact = ({ selected, username, id, online }) => {
+const Contact = ({  username, id, online, onClick ,selected}) => {
   return (
     <div
+    onClick={() => onClick(id)}
       className={
         "border-b border-gray-100 flex items-center gap-2 cursor-pointer" +
         (selected  ? " bg-blue-50" : "")
