@@ -3,23 +3,26 @@ import axios from "axios";
 import { UserContext } from "../context/UserContext";
 
 const RegisterAndLoginFrom = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
-    const [errorMessage, setErrorMessage] = useState("");
-    const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
+    const [username, setUsername] = useState(""); // เก็บค่าชื่อผู้ใช้ที่ผู้ใช้ป้อนเข้ามา
+    const [password, setPassword] = useState(""); // เก็บค่ารหัสผ่านที่ผู้ใช้ป้อนเข้ามา
+    const [isLoginOrRegister, setIsLoginOrRegister] = useState("login"); // เก็บสถานะว่าผู้ใช้กำลังทำการเข้าสู่ระบบหรือลงทะเบียน
+    const [errorMessage, setErrorMessage] = useState(""); // เก็บข้อความข้อผิดพลาดที่อาจเกิดขึ้น
 
+    const { setUsername: setLoggedInUsername, setId } = useContext(UserContext); // ดึงฟังก์ชันเซ็ตชื่อผู้ใช้และ ID จาก Context
+
+    // ฟังก์ชันที่เรียกเมื่อผู้ใช้กดปุ่ม submit ในฟอร์ม
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // หยุดการกระทำเริ่มต้นของฟอร์มเมื่อมีการส่ง
         try {
-            const url = isLoginOrRegister === "register" ? "register" : "login";
-            const { data } = await axios.post(url, { username, password });
-            setLoggedInUsername(username);
-            setId(data.id);
+            const url = isLoginOrRegister === "register" ? "register" : "login"; // กำหนด URL ของเส้นทาง API ตามสถานะ
+            const { data } = await axios.post(url, { username, password }); // ส่งค่าชื่อผู้ใช้และรหัสผ่านไปยังเส้นทาง API
+            setLoggedInUsername(username); // เซ็ตชื่อผู้ใช้ใน Context
+            setId(data.id); // เซ็ต ID ใน Context จากข้อมูลที่ได้รับกลับจาก API
         } catch (error) {
-            setErrorMessage("Invalid credentials. Please try again.");
+            setErrorMessage("Invalid credentials. Please try again."); // เกิดข้อผิดพลาดหากไม่สามารถลงทะเบียนหรือเข้าสู่ระบบได้
         }
     };
+
 
     return (
         <div className="flex items-center justify-center h-screen bg-blue-50" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80)", backdropFilter: "blur(5px)" }}>

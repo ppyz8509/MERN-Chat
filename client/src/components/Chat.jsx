@@ -4,43 +4,57 @@ import axios from "axios";
 import Logo from "./Logo";
 import Contact from "./Contact";
 import { uniqBy } from "lodash";
+// สร้าง Chat component ซึ่งเป็นส่วนหนึ่งของแอปพลิเคชันการสนทนา
 const Chat = () => {
+  // สร้าง state สำหรับเก็บ WebSocket connection
   const [ws, setWs] = useState(null);
+  // สร้าง state สำหรับเก็บข้อมูลผู้ใช้ออนไลน์
   const [onlinePeople, setOnlinePeople] = useState({});
+  // สร้าง state สำหรับเก็บข้อมูลผู้ใช้ออฟไลน์
   const [offlinePeople, setOfflinePeople] = useState({});
+  // สร้าง state สำหรับเก็บไอดีของผู้ใช้ที่ถูกเลือก
   const [selectedUserId, setSelectedUserId] = useState(null);
+  // สร้าง state สำหรับเก็บข้อความที่ถูกส่ง
   const [message, setMessage] = useState([]);
+  // สร้าง state สำหรับเก็บข้อความใหม่ที่พิมพ์
   const [newMessageText, setNewMessageText] = useState({});
 
+  // ดึงข้อมูลผู้ใช้และไอดีจาก Context
   const { username, id, setUsername, setId } = useContext(UserContext);
 
+  // ฟังก์ชันเชื่อมต่อ WebSocket
   const connectToWs = () => {
     const ws = new WebSocket("ws://localhost:4000");
     setWs(ws);
     ws.addEventListener("message", handleMessage);
     ws.addEventListener("close", () => {
+      // หากการเชื่อมต่อถูกปิดโดยไม่ได้ตั้งใจ ให้ลองเชื่อมต่อใหม่
       setTimeout(
         () => {
           console.log("Disconnect. Trying to connect.");
           connectToWs();
         },
-        //ตรงนี้คือ timeout ที่เวลาคือ ms 1000  นี้คือ  1 วิ
+        // ระยะเวลาที่รอก่อนเชื่อมต่อใหม่ (1 วินาที)
         1000
       );
     });
   };
 
+  // ฟังก์ชันสำหรับการจัดการข้อมูลที่ได้รับผ่าน WebSocket
   const handleMessage = (e) => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
+      // ถ้าข้อมูลเป็นข้อมูลของผู้ใช้ออนไลน์
       showOnlinePeople(messageData.online);
     } else if ("text" in messageData) {
+      // ถ้าข้อมูลเป็นข้อความที่ถูกส่ง
       if (messageData.sender === selectedUserId) {
         setMessage((prev) => [...prev, { ...messageData }]);
       }
     }
   };
 
+  // ฟังก์ชันสำหรับแสดงข้อมูลผู้ใช้ออนไลน์
   const showOnlinePeople = (peopleArray) => {
     const people = {};
     peopleArray.forEach(({ userId, username }) => {
@@ -49,10 +63,12 @@ const Chat = () => {
     setOnlinePeople(people);
   };
 
+  // Effect Hook เพื่อเรียกฟังก์ชันเชื่อมต่อ WebSocket เมื่อ selectedUserId เปลี่ยนแปลง
   useEffect(() => {
     connectToWs();
   }, [selectedUserId]);
 
+  // Effect Hook เพื่อดึงข้อมูลผู้ใช้ออฟไลน์เมื่อ onlinePeople หรือ id เปลี่ยนแปลง
   useEffect(() => {
     axios.get("/people").then((res) => {
       const offlinePeopleArr = res.data
@@ -68,9 +84,7 @@ const Chat = () => {
     });
   }, [onlinePeople, id]);
 
-  const onlinePeopleExclOurUser = { ...onlinePeople };
-  delete onlinePeopleExclOurUser[id];
-
+  // ฟังก์ชันสำหรับออกจากระบบ
   const logout = () => {
     axios.post("/logout").then(() => {
       setWs(null);
@@ -79,6 +93,7 @@ const Chat = () => {
     });
   };
 
+  // ฟังก์ชันสำหรับการส่งข้อความ
   const sendMessage = (e, file = null) => {
     if (e) e.preventDefault();
     ws.send(
@@ -105,18 +120,26 @@ const Chat = () => {
       ]);
     }
   };
+
+  // Effect Hook เพื่อดึงข้อมูลข้อความเมื่อ selectedUserId เปลี่ยนแปลง
   useEffect(() => {
     if (selectedUserId) {
       axios.get("/messages/");
     }
   }, [selectedUserId]);
 
+  // ลบข้อความที่ซ้ำกัน
   const messageWithoutDups = uniqBy(message, "_id");
 
+  // ฟังก์ชันสำหรับการส่งไฟล์
   const sendFile = (e) => {
     const reader = new FileReader();
-    reader.readA
-  }
+    reader.read
+  };
+
+
+
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3 flex flex-col">
